@@ -1,0 +1,2 @@
+pre_model: https://arxiv.org/abs/2206.06606
+github:https://github.com/JinanZou/Astock.git
