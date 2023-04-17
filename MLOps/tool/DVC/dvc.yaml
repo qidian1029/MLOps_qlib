@@ -1,0 +1,5 @@
+# dvc.yaml
+stages:
+  preprocess:
+    cmd: python preprocess_data.py
+    deps:

@@ -1,0 +1,14 @@
+{
+  "C": {
+      "_type": "choice",
+      "_value": [0.1, 1, 10, 100]
+  },
+  "epsilon": {
+      "_type": "uniform",
+      "_value": [0.01, 0.1]
+  },
+  "kernel": {
+      "_type": "choice",
+      "_value": ["linear", "poly", "rbf", "sigmoid"]
+  }
+}

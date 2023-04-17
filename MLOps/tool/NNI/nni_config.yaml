@@ -1,0 +1,15 @@
+experimentName: SVR_tuning
+trialConcurrency: 1
+maxTrialNumber: 200
+maxExperimentDuration: 2h
+searchSpaceFile: nni_search_space.json
+useAnnotation: false
+trialCommand: python nni_trial.py
+trialCodeDirectory: ./
+trialGpuNumber: 0
+tuner:
+  name: TPE
+  classArgs:
+    optimize_mode: minimize
+trainingService:
+  platform: local
