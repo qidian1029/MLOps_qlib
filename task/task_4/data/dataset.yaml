@@ -1,0 +1,50 @@
+class: DatasetH
+kwargs:
+  handler:
+    class: Alpha158
+    kwargs:
+      end_time: '2020-08-31'
+      fit_end_time: '2020-06-30'
+      fit_start_time: '2016-07-01'
+      infer_processors:
+      - class: FilterCol
+        kwargs:
+          col_list:
+          - RESI5
+          - WVMA5
+          - RSQR5
+          - KLEN
+          - OPEN0
+          - HIGH0
+          - LOW0
+          - ROC5
+          fields_group: feature
+      - class: RobustZScoreNorm
+        kwargs:
+          clip_outlier: true
+          fields_group: feature
+      - class: Fillna
+        kwargs:
+          fields_group: feature
+      instruments: yunnan
+      label:
+      - Ref($close, -2) / Ref($close, -1) - 1
+      learn_processors:
+      - class: DropnaLabel
+      - class: CSRankNorm
+        kwargs:
+          fields_group: label
+      start_time: '2016-09-01'
+    module_path: qlib.contrib.data.handler
+  segments:
+    test:
+    - '2020-07-01'
+    - '2020-08-31'
+    train:
+    - '2018-07-02'
+    - '2019-12-31'
+    valid:
+    - '2020-01-01'
+    - '2020-06-30'
+module_path: qlib.data.dataset
+path: null

@@ -1,0 +1,11 @@
+model:
+  class: SVRModel
+  kwargs:
+    C: 0.1
+    coef0: 0.0
+    degree: 3
+    epsilon: 0.1
+    gamma: auto
+    kernel: poly
+    shrinking: true
+  module_path: code_lib.Qlib_model
