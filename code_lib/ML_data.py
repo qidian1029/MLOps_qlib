@@ -181,20 +181,23 @@ def qlib_upgrade_data(target_dir):
     import os
     import zipfile
     from datetime import date
+    from zipfile import BadZipFile
 
     # 获取更新当日日期并构造文件名前缀
     today = date.today()
     prefix = today.strftime('%Y%m%d')
         
     # 遍历指定文件夹内的所有.zip文件，如果文件名以前缀开头，则解压缩文件到当前文件夹
-    folder = 'C:/Users/is_li/Desktop'
+    folder = target_dir
     for file in os.listdir(folder):
+        print(file)
         if file.endswith('.zip') and file.startswith(prefix):
-            # 查找当日更新数据压缩包解压
-            with zipfile.ZipFile(os.path.join(folder, file), 'r') as zip_ref:
-                zip_ref.extractall(folder)
+            try:
+                with zipfile.ZipFile(os.path.join(folder, file), 'r') as zip_ref:
+                    zip_ref.extractall(folder)
+            except BadZipFile:
+                print(f"Error: {file} is not a valid zip file.")
         if file.endswith('.zip') and not file.startswith(prefix):
-            # 删除久数据压缩包
             os.remove(os.path.join(folder, file))
     print("数据更新成功")
     pass
