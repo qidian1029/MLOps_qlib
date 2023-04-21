@@ -1,0 +1,47 @@
+common: !include "base_setting.yaml"
+
+experiment: # 实验基础设置
+    name: task_4
+    path: ./ # 项目文件夹存储位置
+
+port_analysis_config: 
+    executor: 
+        class: SimulatorExecutor # 内置executor
+        module_path: qlib.backtest.executor
+        kwargs: 
+            time_per_step: day # 时间间隔
+            generate_portfolio_metrics: True
+    strategy:
+        class: TopkDropoutStrategy #内置策略名称
+        module_path: qlib.contrib.strategy.signal_strategy # 内置策略位置
+        kwargs: 
+            model: # 后续配置已训练好的模型
+            dataset: # 后续配置已与处理好的dataset
+            topk: 10 # 策略参数设置
+            n_drop: 2
+    backtest: 
+        start_time: '2020-07-01' # 回测开始时间
+        end_time: '2020-08-31' # 回测结束时间
+        account: 100000000 # 回测账户额度
+        benchmark: SH000300 # 基线
+        exchange_kwargs: # 回测参数设置
+            freq: day
+            limit_threshold: 0.095
+            deal_price: close
+            open_cost: 0.0005
+            close_cost: 0.0015
+            min_cost: 5
+
+deployment:
+    deploy: False # 是否进行持续部署，自动每天执行一次
+    update_data: False # 是否更新当前下载的存储数据，即更新~/.qlib/qlib_data/cn_data文件夹
+    end_day: '2020-12-31' # 持续部署验证的回测结束时间，单次部署时的时间设置，持续部署自动更新时间到当前日期
+    dataset:
+        config: ./task_4/experiment/data/dataset.yaml # dataset参数设置存储配置文件位置
+    model:
+        config: ./task_4/experiment/model/model_2.yaml # 已训练好的模型配置存储文件位置
+        path:  ./task_4/experiment/model/model_2.bin # 已训练好的模型文件位置
+    annual_return_threshold: 0.2 # 持续部署时的年化收益率下限
+    retrain_interval : 7 # 持续部署时的训练间隔
+
+

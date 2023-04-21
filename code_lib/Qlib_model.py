@@ -115,7 +115,7 @@ def model_param(dataset,config,param_path,save_path):
         evals_result = {}
         model.fit(dataset,evals_result=evals_result)
         R.save_objects(trained_model=model)
-        rid = R.get_recorder().id
+        rid = R.get_recorder(experiment_name="train_model").id
 
     # 预测和评估
     y_pred = model.predict(dataset)

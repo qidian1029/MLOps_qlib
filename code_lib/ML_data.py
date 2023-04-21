@@ -173,39 +173,30 @@ def transform_dataframe(df, n_feature_columns):
 
 
 
-# 通过qlib自带get_data()更新数据
+# 通过qlib自带GetData()更新数据
+from qlib.tests.data import GetData
+def qlib_upgrade_data(target_dir):
+    GetData().qlib_data(target_dir=target_dir,exists_skip=False,delete_old=True)
+    # 解压压缩包并删除久的压缩包
+    import os
+    import zipfile
+    from datetime import date
 
-def qlib_upgrade_data(upgrade):
-    if upgrade == False:
-        return print("不需要更新数据")
-    else :
-        import subprocess
-        # 要执行的命令
-        cmd = r"python c:\ProgramData\Anaconda3\envs\py380\lib\site-packages\qlib\run\get_data.py qlib_data --target_dir ~\.qlib\qlib_data\cn_data --region cn"
-        # 执行命令并获取输出
-        output = subprocess.check_output(cmd, shell=True)
-        print("当日数据下载成功")
-        # 解压压缩包并删除久的压缩包
-        import os
-        import zipfile
-        from datetime import date
-
-        # 获取更新当日日期并构造文件名前缀
-        today = date.today()
-        prefix = today.strftime('%Y%m%d')
+    # 获取更新当日日期并构造文件名前缀
+    today = date.today()
+    prefix = today.strftime('%Y%m%d')
         
-        # 遍历指定文件夹内的所有.zip文件，如果文件名以前缀开头，则解压缩文件到当前文件夹
-        folder = 'C:/Users/is_li/Desktop'
-        for file in os.listdir(folder):
-            if file.endswith('.zip') and file.startswith(prefix):
-                # 查找当日更新数据压缩包解压
-                with zipfile.ZipFile(os.path.join(folder, file), 'r') as zip_ref:
-                    zip_ref.extractall(folder)
-            if file.endswith('.zip') and not file.startswith(prefix):
-                # 删除久数据压缩包
-                os.remove(os.path.join(folder, file))
-        print("数据更新成功")
-        
+    # 遍历指定文件夹内的所有.zip文件，如果文件名以前缀开头，则解压缩文件到当前文件夹
+    folder = 'C:/Users/is_li/Desktop'
+    for file in os.listdir(folder):
+        if file.endswith('.zip') and file.startswith(prefix):
+            # 查找当日更新数据压缩包解压
+            with zipfile.ZipFile(os.path.join(folder, file), 'r') as zip_ref:
+                zip_ref.extractall(folder)
+        if file.endswith('.zip') and not file.startswith(prefix):
+            # 删除久数据压缩包
+            os.remove(os.path.join(folder, file))
+    print("数据更新成功")
     pass
 
 

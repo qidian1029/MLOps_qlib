@@ -1,0 +1,16 @@
+process_design: # 流程设计开关
+    upgrade: False # 是否升级数据集
+    dataset: True # 是否处理数据集
+    train: True # 是否进行训练
+    backtest: True # 是否回测
+    deployment: True # 是否持续部署
+
+qlib:
+    qlib_path : c:/ProgramData/Anaconda3/envs/py380/lib/site-packages/qlib
+    uri: ~/.qlib/qlib_data/cn_data # qlib数据存储路径
+
+folders: # 生成存储文件
+    data: data # 文件名为data
+    model: model
+    result: result
+    plt: plt

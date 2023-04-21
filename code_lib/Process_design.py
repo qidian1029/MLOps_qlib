@@ -104,8 +104,8 @@ def qlib_backtest(config,dataset,model,rid,experiment):
     config["port_analysis_config"]["strategy"]["kwargs"]["dataset"]= dataset
     port_analysis_config = config["port_analysis_config"]
     # backtest and analysis
-    with R.start(experiment_name="backtest_analysis"):
-        recorder = R.get_recorder(recorder_id=rid, experiment_name="train_model")
+    with R.start(experiment_name="backtest_analysis",uri=config["folders"]["model"]):
+        recorder = R.get_recorder(recorder_id=rid)
         model = recorder.load_object("trained_model")
 
         # prediction
@@ -137,21 +137,20 @@ def compare(config):
         "report_normal_df": False,
         "analysis_df": False,
     }
-    result_path = config["folders"]["result"]
+    result_path = config["result_path"]
     if config["compare"] is not None:
         compare_config_result.update(config["compare"])
 
     if compare_config_result["report_normal_df"]:
-        ML_plt.compare_report_normal_df(result_path + "report_normal_df/")
+        ML_plt.compare_report_normal_df(result_path + "/report_normal_df/")
 
     if compare_config_result["analysis_df"]:
-        ML_plt.compare_analysis_df(result_path + "analysis_df/")
+        ML_plt.compare_analysis_df(result_path + "/analysis_df/")
 
 
 # 4.持续部署
 # 更新数据图表
-def update_csv_df(report_normal,config):
-    parent_folder = config["folders"]["continuous"] 
+def update_csv_df(report_normal,parent_folder):
     import datetime
     current_date = datetime.datetime.now().strftime("%Y-%m-%d")
     # Combine the parent folder path with the new folder name
@@ -169,7 +168,7 @@ def update_csv_df(report_normal,config):
                         report_normal["return"] - report_normal["bench"] - report_normal["cost"], freq='day'
                     )
     analysis_df = pd.concat(analysis)  # type: pd.DataFrame
-    analysis_file_path = config["folders"]["continuous"]  + "continuous_analysis_df.csv"
+    analysis_file_path = parent_folder  + "/continuous_analysis_df.csv"
     if not os.path.exists(analysis_file_path):
         analysis_df.columns = [f"{current_date}_{col}" for col in analysis_df.columns]
         analysis_df.to_csv(analysis_file_path)
@@ -187,19 +186,19 @@ def update_csv_df(report_normal,config):
 
 
 # 持续部署
-def continuous_deployment(config):
-    update_data = config['continuous_deployment']['update_data']
-    continuous = config['continuous_deployment']['continuous']
-    end_day = config['continuous_deployment']['end_day']
-    if continuous == True:
+def deployment(config,folder_path):
+    update_data = config['deployment']['update_data']
+    deploy = config['deployment']['deploy']
+    end_day = config['deployment']['end_day']
+    if deploy == True:
         current_date = datetime.now()
         date_string = current_date.strftime("%Y-%m-%d")
         end_day = date_string
-
-    ML_data.qlib_upgrade_data(update_data)
+    if update_data==True:
+        ML_data.qlib_upgrade_data(config['qlib']['uri'])
 
     # Instantiate the dataset using the configuration
-    with open(config['continuous_deployment']['dataset']['config'], "r",encoding="utf-8") as f:
+    with open(config['deployment']['dataset']['config'], "r",encoding="utf-8") as f:
         dataset_config = yaml.safe_load(f)
     
     days = config_updata_time.days_between_dates(dataset_config['kwargs']['handler']['kwargs']['end_time'],end_day)
@@ -207,8 +206,8 @@ def continuous_deployment(config):
     dataset = init_instance_by_config(dataset_config)
 
     # Load the trained model from the specified path
-    model_path = config['continuous_deployment']['model']['path']
-    with open(config['continuous_deployment']['model']['config'], "r",encoding="utf-8") as f:
+    model_path = config['deployment']['model']['path']
+    with open(config['deployment']['model']['config'], "r",encoding="utf-8") as f:
         model_config = yaml.safe_load(f)
     print(model_config)
     model = init_instance_by_config(model_config['model'])
@@ -249,7 +248,7 @@ def continuous_deployment(config):
     analysis_freq = "{0}{1}".format(*Freq.parse(freq))
     report_normal, positions_normal = portfolio_metric_dict.get(analysis_freq)
     # 持续更新回测结果图表
-    update_csv_df(report_normal,config)
+    update_csv_df(report_normal,folder_path)
 
     pass
 
@@ -265,14 +264,14 @@ def print_date():
     print(date_string)
 
 
-def continuous(config):
-    if config['continuous_deployment']['continuous']==True:
+def deploy(config,folder_path):
+    if config['deployment']['deploy']==True:
         schedule.every().day.at("00:00").do(print_date)
         while True:
-            continuous_deployment(config)
+            deployment(config,folder_path)
             schedule.run_pending()
             time.sleep(60)
     else:
-        continuous_deployment(config)
+        deployment(config,folder_path)
         
     pass

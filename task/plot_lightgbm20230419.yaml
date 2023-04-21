@@ -1,0 +1,12 @@
+common: !include "base_setting.yaml"
+
+experiment: # 实验基础设置
+    name: task_4
+    path: ./ # 项目文件夹存储位置
+
+result_path: ./task_4/experiment/result/
+
+compare: # 对比图像开关
+    report_normal_df: True # 是否生成对比交易图
+    analysis_df: False # 是否结果对比图
+
