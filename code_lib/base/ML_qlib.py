@@ -1,5 +1,6 @@
 import qlib
 import pandas as pd
+from qlib.workflow.expm import MLflowExpManager
 from qlib.config import REG_CN
 from qlib.utils import exists_qlib_data, init_instance_by_config
 from qlib.workflow import R
@@ -7,20 +8,26 @@ from qlib.workflow.record_temp import SignalRecord, PortAnaRecord
 from qlib.utils import flatten_dict
 from qlib.contrib.report import analysis_model, analysis_position
 from qlib.data import D
+import sys
+import os
+from code_lib.base import ML_data
 
 def qlib_init(config,path):
-    provider_uri = config["qlib"]["uri"]  # target_dir
-    if not exists_qlib_data(provider_uri):
-        print(f"Qlib data is not found in {provider_uri}")
-        sys.path.append(str(scripts_dir))
-        from get_data import GetData
-        etData().qlib_data(target_dir=provider_uri, region=REG_CN)
-    qlib.init(provider_uri=provider_uri,mount_path=path,region=REG_CN)
+    print("qlib初始化开始")
+    current_working_directory = os.getcwd()
+    # 获取上一级文件夹路径
+    parent_folder_path = os.path.dirname(current_working_directory)
+    sys.path.append(parent_folder_path)
+    config["qlib"]["uri"] = os.path.join(parent_folder_path,config["qlib"]["uri"])
+    print('qlib_uri:',config["qlib"]["uri"])
+    qlib.init(provider_uri=config["qlib"]["uri"],mount_path=path,region=REG_CN)
+    print("qlib初始化完成")
     return 
 
 def model_init(config):
-
+    print('模型初始化开始')
     model = init_instance_by_config(config["task"]["model"])
+    print('模型初始化完成')
     return model
 
 def dataset_init(config):
@@ -28,8 +35,6 @@ def dataset_init(config):
     return dataset
 
 def model_train(model,dataset,config):
-
-    from qlib.workflow.expm import MLflowExpManager
     exp_manager = MLflowExpManager(uri=config["folders"]["model"])# 修改mlflow文件存储位置
     
     # start exp to train model
@@ -63,8 +68,6 @@ def model_train(model,dataset,config):
     #positions = recorder.load_object("portfolio_analysis/positions_normal_1day.pkl")
     analysis_df = recorder.load_object("portfolio_analysis/port_analysis_1day.pkl")
 
-
-    from code_lib import ML_data
     result_path = config["folders"]["result"]
     ML_data.save_df_to_csv(pred_df,result_path)
     ML_data.save_df_to_csv(report_normal_df,result_path)

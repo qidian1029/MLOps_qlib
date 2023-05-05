@@ -10,7 +10,15 @@ from qlib.utils import flatten_dict
 import os
 import torch
 import matplotlib.pyplot as plt
-from code_lib import ML_plt
+import yaml
+import mlflow
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVR
+import json
+from qlib.contrib.model.gbdt import LGBModel
+
+from code_lib.base import ML_plt,ML_qlib
 
 # 存储模型
 def save_trained_model(model, save_path,model_name):
@@ -23,13 +31,11 @@ def save_trained_model(model, save_path,model_name):
     return model_path
 
 # 存储模型配置文件
-import yaml
 def save_yaml(experiment,path,name):
     path = path + f"{name}.yaml"
     with open(path, 'w') as yaml_file:
         yaml.dump(experiment, yaml_file)
     pass
-
 
 # 自定义 SVRModel 类
 class SVRModel(Model):
@@ -78,37 +84,33 @@ class SVRModel(Model):
         # Display the convergence curve
         plt.show()
 
-
-
-import mlflow
-from sklearn.metrics import mean_squared_error
-from sklearn.model_selection import GridSearchCV
-from sklearn.svm import SVR
-import json
-from code_lib import ML_qlib
 def model_param(dataset,config,param_path,save_path):
-
     # 从配置文件中读取参数网格
     with open(param_path, "r") as f:
         param_grid = json.load(f)
 
     grid_search = GridSearchCV(SVR(), param_grid, cv=5, scoring='neg_mean_squared_error')
     # 切分数据集
+    print('切分数据集')
     x_train = dataset.prepare("train", col_set="feature").fillna(0)
     y_train = dataset.prepare("train", col_set="label").fillna(0)
     x_train, y_train = x_train.values, y_train.values.flatten()
 
     # 进行网格搜索
+    print('进行网格搜索')
     grid_search.fit(x_train, y_train)
 
     # 获取最佳参数
     best_params = grid_search.best_params_
 
     # 将最佳参数写入新的配置文件
+    print('存储最优参数')
     with open(save_path['model'] + "best_params.json", "w") as f:
         json.dump(best_params, f)
 
     config["model"]["task"]["model"]["kwargs"]= best_params
+
+    print('使用最优参数进行模型训练')
     with R.start(experiment_name="train_model",uri=save_path['model']):
         R.log_params(**flatten_dict(config["model"]["task"]))
         model = ML_qlib.model_init(config["model"])
@@ -121,6 +123,7 @@ def model_param(dataset,config,param_path,save_path):
     y_pred = model.predict(dataset)
     y_true= dataset.prepare('test').iloc[:, -1:]
     test_loss = mean_squared_error(y_true, y_pred)
+    print('打印模型训练loss')
     print("Test loss: ", test_loss)
 
     # 将评估指标记录到 MLflow
@@ -134,18 +137,12 @@ def save_model(model):
 
     pass
 
-
 # 加载model
 def load_model(model_path):
     
     pass
 
-
-
 # CustomLGBModel
-
-
-from qlib.contrib.model.gbdt import LGBModel
 class CustomLGBModel(LGBModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

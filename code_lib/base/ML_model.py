@@ -13,11 +13,12 @@ from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
 import torch.nn.functional	
 import seaborn as sns
+from code_lib.base import ML_data,ML_plt
+from qlib.contrib.model.gbdt import LGBModel
 
 def model_to_file(model,path):
     # 保存模型
     torch.save(model.state_dict(), path+'model.pth')
-
 
 def model_get_file(model):
     model_path = 'lstm_model.pth'
@@ -29,7 +30,6 @@ def model_get_file(model):
     }
     model.load_state_dict(torch.load(model_path))
     pass
-
 
 class LSTM(nn.Module):
     """
@@ -52,10 +52,8 @@ class LSTM(nn.Module):
         x = x.view(s, b, -1)  # 把形状改回来
         return x
 
-
 def run_lstm(df_data,config):
 
-    from code_lib import ML_data
     feature_num = config["model"]["lstm"]["feature_num"]
     trainX,trainY,testX,testY = ML_data.data_pre(df_data,config)
     ML_data.data_loader(df_data,config)
@@ -87,16 +85,13 @@ def run_lstm(df_data,config):
         #if (epoch + 1) % 2 == 0:
         #   print('Epoch: {}, Loss:{:.10f}'.format(epoch + 1, loss.item()))
 
-    from code_lib import ML_plt
     ML_plt.loss_plt(train_loss,config["folders"]["plt"])
-    
 
     #模型存储
     model_to_file(model,config["folders"]["model"])
     return model
 
 def qlib_lstm_load():
-    from qlib.contrib.model.gbdt import LGBModel
     config = {
             "loss": "mse",
             "colsample_bytree": 0.8879,

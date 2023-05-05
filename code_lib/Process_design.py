@@ -1,8 +1,13 @@
+# 公共包
 import datetime
-import os
 import yaml
 import torch
 import pandas as pd
+from sklearn.metrics import mean_squared_error, accuracy_score
+import schedule
+import time
+from datetime import datetime
+import os
 
 # qlib包
 from qlib.utils import init_instance_by_config,flatten_dict
@@ -12,9 +17,11 @@ from qlib.data.dataset.loader import StaticDataLoader
 from qlib.workflow.record_temp import SignalRecord, PortAnaRecord
 from qlib.contrib.evaluate import risk_analysis 
 from qlib.backtest import backtest as qlib_back
+from qlib.utils.resam import Freq
 
 # 自建
-from code_lib import Qlib_model,ML_qlib,Qlib_dataset,Process_design,config_updata_time,ML_data,ML_plt
+from code_lib.base import ML_qlib,config_updata_time,ML_data,ML_plt
+from code_lib.qlib import Qlib_model,Qlib_dataset
 
 # 1.数据准备，输出dataset
 def data_to_dataset(config):
@@ -43,7 +50,7 @@ def prepar_dataset(config):
             dataset_1 = Qlib_dataset.data_to_dataset(config,data_path)
         else:
             # 模型及数据初始化
-            dataset = Process_design.data_to_dataset(config)
+            dataset = data_to_dataset(config)
 
             # 存储dataset
             Qlib_dataset.qlib_dataset_save(dataset,config)
@@ -52,9 +59,10 @@ def prepar_dataset(config):
             dataset_1 = Qlib_dataset.data_to_dataset(config,data_path)
     return dataset_1
 
-
 # 2.模型训练
 def train_model(dataset,config,path):
+    print('开始模型训练')
+
     default_config = {
         "loss": False,
         "optimize_hyperparams": False,
@@ -77,8 +85,7 @@ def train_model(dataset,config,path):
                 model.fit(dataset)
             R.save_objects(trained_model=model)
             rid = R.get_recorder().id
-
-    from sklearn.metrics import mean_squared_error, accuracy_score
+        
     train_dataloader = dataset.prepare("train")
     valid_dataloader = dataset.prepare("valid")
 
@@ -94,12 +101,12 @@ def train_model(dataset,config,path):
         y_true= dataset.prepare('test').iloc[:, -1:]
         test_loss = mean_squared_error(y_true, y_pred)
         print("Test loss: ", test_loss)
-    
+    print('模型训练完成，存储model和模型id')
     return model,rid
-
 
 # 3.回测预部署
 def qlib_backtest(config,dataset,model,rid,experiment):
+    print('开始进行backtest')
     config["port_analysis_config"]["strategy"]["kwargs"]["model"]= model
     config["port_analysis_config"]["strategy"]["kwargs"]["dataset"]= dataset
     port_analysis_config = config["port_analysis_config"]
@@ -127,12 +134,12 @@ def qlib_backtest(config,dataset,model,rid,experiment):
     pred_df.to_csv(result_path+'/pred_df/'+f"{csv_name}.csv")
     report_normal_df.to_csv(result_path+'/report_normal_df/'+f"{csv_name}.csv")
     analysis_df.to_csv(result_path+'/analysis_df/'+f"{csv_name}.csv")
-
+    print('回测并存储回测数据完成')
     return pred_df,report_normal_df,analysis_df
-
 
 # 回测对比绘图
 def compare(config):
+    print('开始图表绘制')
     compare_config_result = {
         "report_normal_df": False,
         "analysis_df": False,
@@ -147,11 +154,10 @@ def compare(config):
     if compare_config_result["analysis_df"]:
         ML_plt.compare_analysis_df(result_path + "/analysis_df/")
 
-
 # 4.持续部署
 # 更新数据图表
 def update_csv_df(report_normal,parent_folder):
-    import datetime
+    print('更新存储输出图表')
     current_date = datetime.datetime.now().strftime("%Y-%m-%d")
     # Combine the parent folder path with the new folder name
     new_folder_path = os.path.join(parent_folder, current_date)
@@ -181,12 +187,12 @@ def update_csv_df(report_normal,parent_folder):
         updated_df = pd.concat([existing_df, analysis_df], axis=1)
         # Save the updated DataFrame to the CSV file
         updated_df.to_csv(analysis_file_path)
-    
+    print('更新并存储图表完成')
     pass
-
 
 # 持续部署
 def deployment(config,folder_path):
+    print('deployment_start')
     update_data = config['deployment']['update_data']
     deploy = config['deployment']['deploy']
     end_day = config['deployment']['end_day']
@@ -204,6 +210,7 @@ def deployment(config,folder_path):
     days = config_updata_time.days_between_dates(dataset_config['kwargs']['handler']['kwargs']['end_time'],end_day)
     dataset_config = config_updata_time.dataset_time(dataset_config,days)
     dataset = init_instance_by_config(dataset_config)
+    print('dataset初始化完成')
 
     # Load the trained model from the specified path
     model_path = config['deployment']['model']['path']
@@ -243,26 +250,21 @@ def deployment(config,folder_path):
         exchange_kwargs=exchange_kwargs,
         pos_type=pos_type,
     )
-    from qlib.utils.resam import Freq
+    
     freq = exchange_kwargs['freq']
     analysis_freq = "{0}{1}".format(*Freq.parse(freq))
     report_normal, positions_normal = portfolio_metric_dict.get(analysis_freq)
     # 持续更新回测结果图表
     update_csv_df(report_normal,folder_path)
-
+    print('deployment_end')
     pass
 
-
-#每天执行
-import schedule
-import time
-from datetime import datetime
-
+#每天执行print('backtest完成')
 def print_date():
     current_date = datetime.now()
     date_string = current_date.strftime("%Y-%m-%d")
+    print('当天日期')
     print(date_string)
-
 
 def deploy(config,folder_path):
     if config['deployment']['deploy']==True:

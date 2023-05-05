@@ -1,8 +1,8 @@
-# 1. 从 CSV 文件中加载数据
 import pandas as pd
 from qlib.data.dataset.handler import DataHandler
 from qlib.data.dataset.loader import StaticDataLoader
 from qlib.utils import init_instance_by_config
+from code_lib.base import ML_data
 
 def data_to_dataset(config,data_path):
     data = pd.read_csv(data_path,index_col= [0,1],header=[0,1],parse_dates=True).fillna(0)
@@ -14,10 +14,7 @@ def data_to_dataset(config,data_path):
     dataset = init_instance_by_config(config["dataset"])
     return dataset
 
-
-from code_lib import ML_data
 def qlib_dataset_save(dataset,config):
-    
     num = len(dataset.prepare("train","feature").columns.to_list())#num为label的个数
 
     train_df = ML_data.transform_dataframe(dataset.prepare("train"),num)
@@ -30,6 +27,5 @@ def qlib_dataset_save(dataset,config):
     train_df.to_csv(config["folders"]["data"]+"train_dataset.csv")
     valid_df.to_csv(config["folders"]["data"]+"valid_dataset.csv")
     test_df.to_csv(config["folders"]["data"]+"test_dataset.csv")
-
     pass
 

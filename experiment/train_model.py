@@ -2,15 +2,17 @@ import yaml
 import sys
 import os
 import argparse
+from code_lib import Process_design
+from code_lib.base import ML_qlib, ML_file,config_set
+from code_lib.qlib import Qlib_model
+from yamlinclude import YamlIncludeConstructor
 
-def test_model(config_file):
+def main(config_file):
     current_working_directory = os.getcwd()
     parent_folder_path = os.path.dirname(current_working_directory)
     sys.path.append(parent_folder_path)
-    from code_lib import ML_qlib, ML_file, Process_design,config_set
 
     # Load configuration file
-    from yamlinclude import YamlIncludeConstructor
     YamlIncludeConstructor.add_to_loader_class(loader_class=yaml.SafeLoader, base_dir='.')
     base_config_path = "base_setting.yaml"
     config = config_set.merge_configs(base_config_path, config_file)
@@ -25,14 +27,22 @@ def test_model(config_file):
     # 初始化qlib
     ML_qlib.qlib_init(config,mlflow_storage_location)
 
-    folder_path = ML_file.create_folder(config["experiment"]["path"],'deployment')
+    # 准备dataset
+    Qlib_model.save_yaml(config['dataset'],config["folders"]["data"],'dataset')
+    dataset = Process_design.prepar_dataset(config)
 
-    # 持续部署
-    if config['process_design']['deployment']==True:
-        Process_design.deploy(config,folder_path)
+    # 模型训练
+    for i, experiment in enumerate(config["experiments_list"]):
+        print(f"Running experiment {i + 1}...")  
+        model,rid = Process_design.train_model(dataset,experiment,config["folders"])
+        Qlib_model.save_trained_model(model,config["folders"]["model"],experiment['train_name'])
+        Qlib_model.save_yaml(experiment['model']['task'],config["folders"]["model"],experiment['train_name'])
+        Process_design.qlib_backtest(config,dataset,model,rid,experiment)
     
+    # ... rest of the code ...
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train model with the specified configuration file.")
     parser.add_argument("config_file", type=str, help="Path to the configuration file.")
     args = parser.parse_args()
-    test_model(args.config_file)
+    main(args.config_file)

@@ -2,7 +2,6 @@ from qlib.workflow import R
 from qlib.utils import flatten_dict
 from qlib.workflow.record_temp import SignalRecord, PortAnaRecord
 
-
 def qlib_backtest(config,dataset,model,rid):
     config["port_analysis_config"]["strategy"]["kwargs"]["model"]= model
     config["port_analysis_config"]["strategy"]["kwargs"]["dataset"]= dataset
@@ -29,8 +28,8 @@ def qlib_backtest(config,dataset,model,rid):
     analysis_df = recorder.load_object("portfolio_analysis/port_analysis_1day.pkl")
 
 
-    from code_lib import ML_data
     result_path = config["folders"]["result"]
+    #from code_lib import ML_data
     #ML_data.save_df_to_csv(pred_df,result_path)
     #ML_data.save_df_to_csv(report_normal_df,result_path)
     #ML_data.save_df_to_csv(analysis_df,result_path)

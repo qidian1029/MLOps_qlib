@@ -1,4 +1,5 @@
 import os
+
 def create_folder(parent_directory, folder_name):
     new_folder_path = os.path.join(parent_directory, folder_name)
 
@@ -7,9 +8,8 @@ def create_folder(parent_directory, folder_name):
         os.makedirs(new_folder_path)
     return new_folder_path
 
-
 def create_file(config):
-
+    print('创建文件夹')
     # 获取实验名称和路径
     experiment_name = config["experiment"]["name"]
     experiment_path = os.path.join(config["experiment"]["path"], experiment_name)
@@ -29,6 +29,7 @@ def create_file(config):
     create_folder(result_path,'pred_df')
     create_folder(result_path,'report_normal_df')
     create_folder(result_path ,'analysis_df')
+    print("创建文件夹结束")
     return config
 
 

@@ -1,8 +1,12 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.io as pio
+import logging
+from tqdm import tqdm
 
 def loss_plt(train_loss,plt_path):
+    print('绘制并存储loss图像')
     # 创建一个新的图像
     plt.figure()
      # 绘制损失曲线
@@ -16,6 +20,7 @@ def loss_plt(train_loss,plt_path):
     plt.savefig(plt_path + 'loss.png')
 
 def qlib_plt_loss(evals_result,model_name,save_path):
+    print('绘制并存储loss图像')
     # Plot the loss curve
     plt.plot(evals_result)
     plt.xlabel("Iteration")
@@ -31,9 +36,7 @@ def qlib_plt_loss(evals_result,model_name,save_path):
     #plt.show()
     pass
 
-
 def report_plt(df,plt_path):# 将每一列绘制成一个单独的折线图
-
     # 为每一列绘制并保存图形
     for column in df.columns:
         plt.figure()  # 创建新图像
@@ -45,10 +48,8 @@ def report_plt(df,plt_path):# 将每一列绘制成一个单独的折线图
     
         # 保存图像到文件夹
         plt.savefig(plt_path + f"{column}_plot.png")
-
     #   关闭所有图像
     #plt.close('all')
-
 
 def column_plt(df,plt_path):
     # 绘制柱状图
@@ -64,14 +65,8 @@ def column_plt(df,plt_path):
     #plt.show()
     plt.savefig(plt_path + "column_plt.png")
 
-
-
-
-import os
-import plotly.io as pio
-import logging
-
 logging.basicConfig(level=logging.INFO)
+
 def plot_and_save_figures(fig_list, plt_path):
     """
     Plot and save a list of Plotly figures to a specified directory.
@@ -80,7 +75,6 @@ def plot_and_save_figures(fig_list, plt_path):
         fig_list (list): A list of Plotly figure objects to be plotted and saved.
         plt_path (str): The directory path where the images will be saved.
     """
-    from tqdm import tqdm
     renderer = None
     for idx, fig in enumerate(tqdm(fig_list)):
 
@@ -98,8 +92,8 @@ def plot_and_save_figures(fig_list, plt_path):
         # io.write_image(fig, output_filepath, width=80, height=60, scale=0.2) #保存图像
         logging.info(f"Figure {idx + 1} processed.")
 
-
 def compare_report_normal_df(folder_path):
+    print('绘制并存储report_normal_df')
     # 读取文件夹内所有csv数据，存储为以文件名命名的dataframe格式数据
     data_dict = {}
     for file_name in os.listdir(folder_path):
@@ -121,12 +115,8 @@ def compare_report_normal_df(folder_path):
         plt.show()
     pass
 
-
 def bar_plot(with_cost_df,folder_path,df_name):
-    import matplotlib.pyplot as plt
-
     fig,axes = plt.subplots(nrows=1, ncols=5, figsize=(20, 3))
-
     metrics = with_cost_df.index
     colormap = 'viridis'
 
@@ -153,9 +143,7 @@ def bar_plot(with_cost_df,folder_path,df_name):
     pass
 
 def compare_analysis_df(folder_path):
-    import os
-    import pandas as pd
-    import matplotlib.pyplot as plt
+    print('绘制并存储analysis_df')
     # 获取文件夹内所有 "model_" 开头的 CSV 文件
     csv_files = [f for f in os.listdir(folder_path) if f.startswith("model_") and f.endswith(".csv")]
 

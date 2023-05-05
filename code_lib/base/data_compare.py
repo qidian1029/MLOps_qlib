@@ -1,4 +1,4 @@
-from code_lib import ML_plt
+from code_lib.base import ML_plt
 
 def comepare(config):
     compare_config = {

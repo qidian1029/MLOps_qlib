@@ -4,15 +4,17 @@ import yaml
 import sys
 import os
 import argparse
+from code_lib import Process_design
+from code_lib.base import config_set
+
+from yamlinclude import YamlIncludeConstructor
 
 def plot_result(config_file):
     current_working_directory = os.getcwd()
     parent_folder_path = os.path.dirname(current_working_directory)
     sys.path.append(parent_folder_path)
-    from code_lib import Process_design,config_set
 
     # Load configuration file
-    from yamlinclude import YamlIncludeConstructor
     YamlIncludeConstructor.add_to_loader_class(loader_class=yaml.SafeLoader, base_dir='.')
     base_config_path = "base_setting.yaml"
     config = config_set.merge_configs(base_config_path, config_file)

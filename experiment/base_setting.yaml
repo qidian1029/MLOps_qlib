@@ -7,7 +7,7 @@ process_design: # 流程设计开关
 
 qlib:
     qlib_path : c:/ProgramData/Anaconda3/envs/py380/lib/site-packages/qlib
-    uri: ~/.qlib/qlib_data/cn_data # qlib数据存储路径
+    uri: ./data/cn_data # qlib数据存储路径
 
 folders: # 生成存储文件
     data: data # 文件名为data

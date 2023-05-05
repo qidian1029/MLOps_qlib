@@ -40,7 +40,7 @@ experiments_list: # 实验模型配置
         task: 
             model:
                 class: SVRModel # 自定义模型类名
-                module_path: code_lib.Qlib_model #自定义模型类位置
+                module_path: code_lib.qlib.Qlib_model #自定义模型类位置
                 kwargs:
 
 dataset:

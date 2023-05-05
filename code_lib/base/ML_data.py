@@ -2,19 +2,20 @@ from qlib.data import D
 import numpy as np
 import torch
 import pandas as pd
+import pickle
 import os
+import inspect
+from qlib.tests.data import GetData
 
 def preprocess_data(df):
     # 在这个函数中添加数据预处理代码
     pass
-
 
 def get_stock_data_and_save_as_csv(config):
 
     path  = os.path.join(config["experiment"]["path"], config["folders"]["data"], config["data"]["input"])
     df = D.features([config["data"]["symbol"]], ['$close'], config["data"]["start_date"], config["data"]["end_date"])
     df.to_csv(path)
-
 
 def open_stock_data(config):
 
@@ -69,11 +70,9 @@ def data_loader(df_data,config):
                                           batch_size=batch_size, 
                                           shuffle=False)
     
-
 def data_get_csv(df):
 
     pass
-
 
 def tensor_cat_dataframe(tensor1, tensor2,columns_list):
 
@@ -89,8 +88,6 @@ def tensor_cat_dataframe(tensor1, tensor2,columns_list):
     print(df.head())
     return df
 
-
-import pickle
 # 将元组保存到文件中
 def save_tuple_to_file(data_tuple, file_path):
     """
@@ -140,23 +137,14 @@ def save_dataframe_to_csv(df, folder_path, filename):
     # 保存 DataFrame 为 CSV 文件
     df.to_csv(file_path, index=False)
 
-
-
-
-import os
-import pandas as pd
-import inspect
 def get_variable_name(var):
     callers_local_vars = inspect.currentframe().f_back.f_locals.items()
     return [var_name for var_name, var_val in callers_local_vars if var_val is var]
-
 
 def save_df_to_csv(df,folder_path,exp_name):
     # 保存 DataFrame 为 CSV 文件
     df.to_csv(folder_path, f"{exp_name}.csv",index=True,)
 
-
-import pandas as pd
 # 设置二级列名，转换表格数据，适配qlib的dataset数据输入要求
 def transform_dataframe(df, n_feature_columns):
     # df数据表，n_feature_columns特征数
@@ -171,10 +159,7 @@ def transform_dataframe(df, n_feature_columns):
     
     return df
 
-
-
 # 通过qlib自带GetData()更新数据
-from qlib.tests.data import GetData
 def qlib_upgrade_data(target_dir):
     GetData().qlib_data(target_dir=target_dir,exists_skip=False,delete_old=True)
     # 解压压缩包并删除久的压缩包
