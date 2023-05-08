@@ -3,7 +3,6 @@ import sys
 import os
 import argparse
 import certifi
-from code_lib.base import ML_data,config_set
 from yamlinclude import YamlIncludeConstructor
 
 os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
@@ -17,6 +16,8 @@ def update_data(config_file):
     YamlIncludeConstructor.add_to_loader_class(loader_class=yaml.SafeLoader, base_dir='.')
 
     base_config_path = "base_setting.yaml"
+    from code_lib.base import ML_data,config_set
+    
     config = config_set.merge_configs(base_config_path, config_file)
     if config['update_data']['tool']['qlib']==True:
         path = os.path.join(parent_folder_path,config['qlib']['uri'])

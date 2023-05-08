@@ -2,8 +2,6 @@ import yaml
 import sys
 import os
 import argparse
-from code_lib import Process_design
-from code_lib.base import ML_qlib, ML_file,config_set
 from yamlinclude import YamlIncludeConstructor
 
 def test_model(config_file):
@@ -14,8 +12,10 @@ def test_model(config_file):
     # Load configuration file
     YamlIncludeConstructor.add_to_loader_class(loader_class=yaml.SafeLoader, base_dir='.')
     base_config_path = "base_setting.yaml"
+    from code_lib import Process_design
+    from code_lib.base import ML_qlib, ML_file,config_set
+
     config = config_set.merge_configs(base_config_path, config_file)
-    
     # 创建文件夹
     ML_file.create_file(config)
 
