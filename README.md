@@ -2,8 +2,10 @@
 MLOps：stock by Qlib
 github:https://github.com/qidian1029/MLOps_qlib.git
 ## 环境需求
-python==3.8
-更新pip：pip install --user --upgrade pip
+### 新建python环境 版本：python==3.8
+ 使用conda：
+   conda create -n py3.8 python=3.8
+### 更新pip：pip install --user --upgrade pip
 
 # 方法一：cmd 命令行执行
  ## 到experiment路径下
