@@ -92,28 +92,45 @@ def plot_and_save_figures(fig_list, plt_path):
         # io.write_image(fig, output_filepath, width=80, height=60, scale=0.2) #保存图像
         logging.info(f"Figure {idx + 1} processed.")
 
-def compare_report_normal_df(folder_path):
+def compare_report_normal_df(folder_path, config):
     print('绘制并存储report_normal_df')
     # 读取文件夹内所有csv数据，存储为以文件名命名的dataframe格式数据
     data_dict = {}
     for file_name in os.listdir(folder_path):
         if file_name.endswith('.csv'):
             file_path = os.path.join(folder_path, file_name)
-            df = pd.read_csv(file_path,index_col=0,header=0)
+            df = pd.read_csv(file_path, index_col=0, header=0)
             df = df.iloc[1:]
             data_dict[file_name] = df
-    # 绘制所有dataframe数据里的相同列名的数据在一张折线图上
-    cols = set.intersection(*[set(df.columns) for df in data_dict.values()])
-    for col in cols:
-        plt.figure()
-        plt.title(col)
-        for file_name, df in data_dict.items():
-            if col in df.columns:
-                plt.plot(df[col], label=file_name)
-        plt.legend()
-        plt.savefig(os.path.join(folder_path, f"{col}.png"))
-        plt.show()
+
+    # 根据配置文件绘制折线图
+    for col_name, should_plot in config.items():
+        if should_plot:
+            if col_name == 'return_bench':
+                # 绘制 'bench' 和 'return' 两列的对比图
+                plt.figure()
+                plt.title(f"return_bench")
+                for file_name, df in data_dict.items():
+                    plt.subplots(figsize=(10, 6))
+                    plt.plot(df['bench'], label=f"{file_name} - bench")
+                    plt.plot(df['return'], label=f"{file_name} - return")
+                    plt.xticks(rotation=45)
+                    plt.tight_layout()
+                plt.legend()
+                plt.savefig(os.path.join(folder_path, f"return_bench.png"))
+            else:
+                plt.figure()
+                plt.title(col_name)
+                for file_name, df in data_dict.items():
+                    plt.subplots(figsize=(10, 6))
+                    plt.plot(df[col_name], label=file_name)
+                    plt.xticks(rotation=45)
+                    plt.tight_layout()
+                plt.legend()
+                plt.savefig(os.path.join(folder_path, f"{col_name}.png"))
+                
     pass
+
 
 def bar_plot(with_cost_df,folder_path,df_name):
     fig,axes = plt.subplots(nrows=1, ncols=5, figsize=(20, 3))

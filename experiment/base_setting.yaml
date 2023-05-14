@@ -3,11 +3,14 @@ process_design: # 流程设计开关
     dataset: True # 是否处理数据集
     train: True # 是否进行训练
     backtest: True # 是否回测
+    test: True
     deployment: True # 是否持续部署
 
 qlib:
     qlib_path : c:/ProgramData/Anaconda3/envs/py380/lib/site-packages/qlib
     uri: ./data/cn_data # qlib数据存储路径
+    collector_path: ./code_lib/qlib/data_collector/cn_index/collector.py
+    dump_bin_path: ./code_lib/qlib/scripts/dump_bin.py
 
 folders: # 生成存储文件
     data: data # 文件名为data

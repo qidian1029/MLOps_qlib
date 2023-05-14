@@ -149,12 +149,13 @@ def compare(config):
         compare_config_result.update(config["compare"])
 
     if compare_config_result["report_normal_df"]:
-        ML_plt.compare_report_normal_df(result_path + "/report_normal_df/")
+        ML_plt.compare_report_normal_df(result_path + "/report_normal_df/",config['compare']['report_sort'])
 
     if compare_config_result["analysis_df"]:
         ML_plt.compare_analysis_df(result_path + "/analysis_df/")
 
-# 4.持续部署
+    pass
+
 # 更新数据图表
 def update_csv_df(report_normal,parent_folder):
     print('更新存储输出图表')
@@ -190,19 +191,93 @@ def update_csv_df(report_normal,parent_folder):
     print('更新并存储图表完成')
     pass
 
-# 持续部署
+# 4.测试
+def test_model(config,folder_path):
+    print('测试开始')
+    end_day = config['test']['end_day']
+    with open(config['deployment']['dataset']['config'], "r",encoding="utf-8") as f:
+        dataset_config = yaml.safe_load(f)   
+    
+    days = config_updata_time.days_between_dates(dataset_config['kwargs']['handler']['kwargs']['end_time'],end_day)
+    dataset_config = config_updata_time.dataset_time(dataset_config,days)
+    dataset = init_instance_by_config(dataset_config)
+    print('dataset初始化完成')
+
+    # Load the trained model from the specified path
+    model_path = config['test']['model']['path']
+    with open(config['test']['model']['config'], "r",encoding="utf-8") as f:
+        model_config = yaml.safe_load(f)
+    print(model_config)
+    model = init_instance_by_config(model_config['model'])
+    model.model = torch.load(model_path)
+    # Instantiate the strategy using the configuration
+    strategy_config = config["port_analysis_config"]["strategy"]
+    strategy_config['kwargs']["model"] = model
+    strategy_config['kwargs']['dataset'] = dataset
+
+    strategy = init_instance_by_config(strategy_config)
+
+    # Instantiate the executor using the configuration
+    executor_config = config["port_analysis_config"]["executor"]
+    executor = init_instance_by_config(executor_config)
+
+    # Perform backtesting using the configuration
+    config["port_analysis_config"] = config_updata_time.port_analysis_config_time(config["port_analysis_config"],days)
+    
+    backtest_start_time = config["port_analysis_config"]["backtest"]["start_time"]
+    backtest_end_time = config["port_analysis_config"]["backtest"]["end_time"]
+    benchmark = config["port_analysis_config"]["backtest"]["benchmark"]
+    account = config["port_analysis_config"]["backtest"]["account"]
+    exchange_kwargs = config["port_analysis_config"]["backtest"]["exchange_kwargs"]
+    pos_type = "Position"
+
+    portfolio_metric_dict, indicator_dict = qlib_back(
+        start_time=backtest_start_time,
+        end_time=backtest_end_time,
+        strategy=strategy,
+        executor=executor,
+        benchmark=benchmark,
+        account=account,
+        exchange_kwargs=exchange_kwargs,
+        pos_type=pos_type,
+    )
+    
+    freq = exchange_kwargs['freq']
+    analysis_freq = "{0}{1}".format(*Freq.parse(freq))
+    report_normal, positions_normal = portfolio_metric_dict.get(analysis_freq)
+    # 持续更新回测结果图表
+    update_csv_df(report_normal,folder_path)
+
+    return print('测试结束')
+
+
+# 5.持续部署
+def deploy_update_data(config,parent_folder_path):
+
+    if config['update_data']['tool']['qlib']==True:
+        path = os.path.join(parent_folder_path,config['qlib']['uri'])
+        ML_data.qlib_upgrade_data(path)
+        print('更新完成,cn_data存储地址：',path)
+    else:
+        print('不需要更新qlib_data') 
+
+    if config['update_data']['tool']['akshare'] == True:
+        from code_lib.qlib import update_data
+        print(config['update_data'])
+        if config['update_data']['update_market'] == True:
+            print('更新market文件')
+            update_data.update_market(config)
+
+        update_data.ak_data_to_csv(config)
+    return print('当日数据更新完成')
+
 def deployment(config,folder_path):
     print('deployment_start')
-    update_data = config['deployment']['update_data']
-    deploy = config['deployment']['deploy']
-    end_day = config['deployment']['end_day']
-    if deploy == True:
-        current_date = datetime.now()
-        date_string = current_date.strftime("%Y-%m-%d")
-        end_day = date_string
-    if update_data==True:
-        ML_data.qlib_upgrade_data(config['qlib']['uri'])
-
+    
+    current_date = datetime.now()
+    date_string = current_date.strftime("%Y-%m-%d")
+    end_day = date_string
+    
     # Instantiate the dataset using the configuration
     with open(config['deployment']['dataset']['config'], "r",encoding="utf-8") as f:
         dataset_config = yaml.safe_load(f)
@@ -266,14 +341,18 @@ def print_date():
     print('当天日期')
     print(date_string)
 
-def deploy(config,folder_path):
-    if config['deployment']['deploy']==True:
+def deploy(config,folder_path,parent_folder_path):
+    if config['deployment']['end_day'] > datetime.now().strftime("%Y-%m-%d"):
         schedule.every().day.at("00:00").do(print_date)
         while True:
+            deploy_update_data(config,parent_folder_path)
             deployment(config,folder_path)
             schedule.run_pending()
             time.sleep(60)
     else:
+        deploy_update_data(config,parent_folder_path)
         deployment(config,folder_path)
         
     pass
+
+    

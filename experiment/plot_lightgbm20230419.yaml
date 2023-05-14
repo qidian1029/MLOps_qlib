@@ -8,5 +8,14 @@ result_path: ./task_4/experiment/result/
 
 compare: # 对比图像开关
     report_normal_df: True # 是否生成对比交易图
+    report_sort:
+        return_bench: True
+        account: True
+        total_cost: False
+        value: False
+        turnover: False
+        cash: False
+        total_turnover: False
+        cost: False
     analysis_df: False # 是否结果对比图
 

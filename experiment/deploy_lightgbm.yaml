@@ -4,6 +4,24 @@ experiment: # 实验基础设置
     name: task_4
     path: ./ # 项目文件夹存储位置
 
+deployment:
+    end_day: '2023-12-31' # 持续部署验证的回测结束时间，单次部署时的时间设置，持续部署自动更新时间到当前日期
+    dataset:
+        config: ./task_4/experiment/data/dataset.yaml # dataset参数设置存储配置文件位置
+    model:
+        config: ./task_4/experiment/model/model_2.yaml # 已训练好的模型配置存储文件位置
+        path:  ./task_4/experiment/model/model_2.bin # 已训练好的模型文件位置
+
+update_data:
+    tool:
+        qlib: False # 是否更新当前下载的存储数据，即更新~/.qlib/qlib_data/cn_data文件夹
+        akshare: True
+    update_market: False # 是否更新股票池 sci100，sci300，sci500
+    market: sci300 # 更新的股票集合
+    market_path: ./data/cn_data/instruments/csi300.txt #股票集文件位置
+
+
+
 port_analysis_config: 
     executor: 
         class: SimulatorExecutor # 内置executor
@@ -31,17 +49,4 @@ port_analysis_config:
             open_cost: 0.0005
             close_cost: 0.0015
             min_cost: 5
-
-deployment:
-    deploy: False # 是否进行持续部署，自动每天执行一次
-    update_data: False # 是否更新当前下载的存储数据，即更新~/.qlib/qlib_data/cn_data文件夹
-    end_day: '2020-12-31' # 持续部署验证的回测结束时间，单次部署时的时间设置，持续部署自动更新时间到当前日期
-    dataset:
-        config: ./task_4/experiment/data/dataset.yaml # dataset参数设置存储配置文件位置
-    model:
-        config: ./task_4/experiment/model/model_2.yaml # 已训练好的模型配置存储文件位置
-        path:  ./task_4/experiment/model/model_2.bin # 已训练好的模型文件位置
-    annual_return_threshold: 0.2 # 持续部署时的年化收益率下限
-    retrain_interval : 7 # 持续部署时的训练间隔
-
 

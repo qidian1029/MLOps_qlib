@@ -25,11 +25,12 @@ def test_model(config_file):
     # 初始化qlib
     ML_qlib.qlib_init(config,mlflow_storage_location)
 
-    folder_path = ML_file.create_folder(config["experiment"]["path"],'deployment')
+    folder_path = ML_file.create_folder(config["experiment"]["path"],'test')
 
     # 持续部署
-    if config['process_design']['deployment']==True:
-        Process_design.deploy(config,folder_path)
+    if config['process_design']['test']==True:
+        Process_design.test_model(config,folder_path)
+        
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train model with the specified configuration file.")

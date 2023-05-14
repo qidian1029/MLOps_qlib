@@ -35,7 +35,7 @@ def deploy_model(config_file):
     # 持续部署
     if config['process_design']['deployment']==True:
         print('开始持续部署')
-        Process_design.deploy(config,folder_path)
+        Process_design.deploy(config,folder_path,parent_folder_path)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train model with the specified configuration file.")
