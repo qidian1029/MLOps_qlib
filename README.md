@@ -22,11 +22,11 @@ github:https://github.com/qidian1029/MLOps_qlib.git
   ## 更新数据
   修改配置文件update_Alpha158_csi500_till_today.yaml
   ### 执行命令
-    python update_data.py update_Alpha158_csi500_till_today.yaml
+    python update_data.py update_Alpha158_csi100_till_today.yaml
     #### 如若需要更新数据到最新，则需要使用akshare工具，需要更新pymongo包
     
   ## 训练模型
-  修改配置文件train_lightgbm_Alpha158_csi500.yaml
+  修改配置文件train_lightgbm_Alpha158_csi100.yaml
   ### 执行命令
     python train_model.py train_lightgbm_Alpha158_csi500.yaml
   
