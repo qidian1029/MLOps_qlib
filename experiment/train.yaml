@@ -56,7 +56,7 @@ dataset:
                 end_time: '2020-08-31' # dataset结束时间
                 fit_start_time: '2016-07-01'
                 fit_end_time: '2020-06-30'
-                instruments: csi300 # 股票市场，yunnan为自定义股票市场，系统自带的是csi300，csi100,可以自定义txt文件放到\.qlib\qlib_data\cn_data\instruments文件夹内
+                instruments: csi100 # 股票市场，yunnan为自定义股票市场，系统自带的是csi300，csi100,可以自定义txt文件放到\.qlib\qlib_data\cn_data\instruments文件夹内
                 infer_processors: # 内置预处理方法
                     - class: FilterCol # 筛选特定值
                       kwargs:

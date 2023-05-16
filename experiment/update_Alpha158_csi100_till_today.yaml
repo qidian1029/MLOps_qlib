@@ -2,9 +2,9 @@ common: !include "base_setting.yaml"
 
 update_data:
     tool:
-        qlib: False # 是否更新当前下载的存储数据，即更新~/.qlib/qlib_data/cn_data文件夹
+        qlib: True # 是否更新当前下载的存储数据，即更新~/.qlib/qlib_data/cn_data文件夹
         akshare: True
-    update_market: True # 是否更新股票池 sci100，sci300，sci500
+    update_market: False # 是否更新股票池 sci100，sci300，sci500
     market: sci100 # 更新的股票集合
     market_path: ./data/cn_data/instruments/csi100.txt #股票集文件位置
         
