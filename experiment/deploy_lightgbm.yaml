@@ -12,15 +12,6 @@ deployment:
         config: ./task_4/experiment/model/model_2.yaml # 已训练好的模型配置存储文件位置
         path:  ./task_4/experiment/model/model_2.bin # 已训练好的模型文件位置
 
-update_data:
-    tool:
-        qlib: False # 是否更新当前下载的存储数据，即更新~/.qlib/qlib_data/cn_data文件夹
-        akshare: True
-    update_market: False # 是否更新股票池 sci100，sci300，sci500
-    market: sci100 # 更新的股票集合
-    market_path: ./data/cn_data/instruments/csi100.txt #股票集文件位置
-
-
 
 port_analysis_config: 
     executor: 

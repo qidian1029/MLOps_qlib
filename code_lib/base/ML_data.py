@@ -6,6 +6,8 @@ import pickle
 import os
 import inspect
 from qlib.tests.data import GetData
+import akshare as ak
+import pandas as pd
 
 def preprocess_data(df):
     # 在这个函数中添加数据预处理代码
@@ -187,4 +189,30 @@ def qlib_upgrade_data(target_dir):
     print("数据更新成功")
     pass
 
+def akshare_upgrade_data(data_path):
+    #获取所有股票代码
+    stock_list = ak.stock_zh_a_spot()
+    
+    from tqdm import tqdm
+    stock_info_list = []  # 创建一个列表来保存每个股票的信息
 
+    for symbol in tqdm(stock_list['代码']):  # 使用 tqdm 包装迭代器   
+        try:
+            # 尝试获取股票历史数据
+            stock_hist_data = ak.stock_zh_a_daily(symbol=symbol, adjust="qfq")
+            if not stock_hist_data.empty:
+                stock_hist_data = stock_hist_data.set_index('date')
+                # 将索引转换为日期类型
+                stock_hist_data.index = pd.to_datetime(stock_hist_data.index)
+                # 提取最早和最晚的日期
+                start_date = stock_hist_data.index.min().strftime('%Y-%m-%d')
+                end_date = stock_hist_data.index.max().strftime('%Y-%m-%d')
+                # 将股票信息添加到列表中
+                stock_info_list.append(f'{symbol.upper()}\t{start_date}\t{end_date}\n')
+            
+        except Exception as e:
+            print(f"Error processing symbol: {symbol}")
+
+    # 在所有股票处理完之后，将列表写入文件
+    with open(f'{data_path}/stock_dates.txt', 'a') as file:  # 注意这里用 'w' 而不是 'a'
+        file.writelines(stock_info_list)

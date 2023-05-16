@@ -20,20 +20,19 @@
   cd /experiment
   执行下列命令
   ## 更新数据
-  修改配置文件update_Alpha158_csi100_till_today.yaml
+  需要更新pymongo包：pip install --ignore-installed pymongo
   ### 执行命令
-    python update_data.py update_Alpha158_csi100_till_today.yaml
-    #### 如若需要更新数据到最新，则需要使用akshare工具，需要更新pymongo包
+    python update_data.py
     
   ## 训练模型
-  修改配置文件train_lightgbm_Alpha158_csi100.yaml
+  修改配置文件train_lightgbm_Alpha158_stock_dates.yaml
   ### 执行命令
-    python train_model.py train_lightgbm_Alpha158_csi100.yaml
+    python train_model.py train_lightgbm_Alpha158_stock_dates.yaml
   
   ## 绘制图像
-  修改配置文件plot_lightgbm20230419.yaml
+  修改配置文件plot_lightgbm.yaml
   ### 执行命令
-    python plot_result.py plot_lightgbm20230419.yaml
+    python plot_result.py plot_lightgbm.yaml
     
   ## 测试模型
   修改配置文件test_lightgbm.yaml

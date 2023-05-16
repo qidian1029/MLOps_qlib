@@ -250,25 +250,22 @@ def test_model(config,folder_path):
 
     return print('测试结束')
 
-
 # 5.持续部署
 def deploy_update_data(config,parent_folder_path):
 
-    if config['update_data']['tool']['qlib']==True:
-        path = os.path.join(parent_folder_path,config['qlib']['uri'])
-        ML_data.qlib_upgrade_data(path)
-        print('更新完成,cn_data存储地址：',path)
-    else:
-        print('不需要更新qlib_data') 
+    from code_lib.base import ML_data
+    from code_lib.qlib import update_data
 
-    if config['update_data']['tool']['akshare'] == True:
-        from code_lib.qlib import update_data
-        print(config['update_data'])
-        if config['update_data']['update_market'] == True:
-            print('更新market文件')
-            update_data.update_market(config)
-
-        update_data.ak_data_to_csv(config)
+    data_path = os.path.join(parent_folder_path,config['qlib']['uri'])
+    # 指定你想要的目录
+    directory = data_path+'/instruments'
+    # 检查目录是否存在
+    if not os.path.exists(directory):
+    # 如果不存在，创建它
+        os.makedirs(directory)
+        
+    ML_data.akshare_upgrade_data(data_path=directory)
+    update_data.ak_data_to_csv(config)
     return print('当日数据更新完成')
 
 def deployment(config,folder_path):

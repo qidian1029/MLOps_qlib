@@ -36,16 +36,13 @@ def csv_bin(dump_path,csv_path,qlib_dir):
 # akshare更新数据库
 def ak_data_to_csv(config):
     dump_path = config['qlib']['dump_bin_path']
-    path = config['update_data']['market_path']
-    market = config['update_data']['market']
-    data_path = config['update_data']['data_path']
-    csv_path = f'{data_path}/{market}'
+    path = config['qlib']['stock_txt_path']
+    data_path = config['qlib']['data_path']
+    csv_path = f'{data_path}/stock'
     with open(path, "r") as f:
         lines = f.readlines()
         stock_info = [line.strip().split("\t") for line in lines]
-    print(csv_path)
     os.makedirs(csv_path, exist_ok=True)
-
     for stock_code, start_date, end_date in stock_info:
         start_date = start_date.replace('-', '')
         end_date = end_date.replace('-', '')
