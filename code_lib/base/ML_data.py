@@ -192,10 +192,10 @@ def qlib_upgrade_data(target_dir):
 def akshare_upgrade_data(data_path):
     #获取所有股票代码
     stock_list = ak.stock_zh_a_spot()
-    
+
     from tqdm import tqdm
     stock_info_list = []  # 创建一个列表来保存每个股票的信息
-
+    
     for symbol in tqdm(stock_list['代码']):  # 使用 tqdm 包装迭代器   
         try:
             # 尝试获取股票历史数据

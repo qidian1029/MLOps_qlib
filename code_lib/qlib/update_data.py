@@ -45,9 +45,12 @@ def ak_data_to_csv(config):
     os.makedirs(csv_path, exist_ok=True)
     for stock_code, start_date, end_date in stock_info:
         start_date = start_date.replace('-', '')
+        current_date = end_date
         end_date = end_date.replace('-', '')
+
         stock_code = stock_code.lower()
-        df = ak.stock_zh_a_hist(symbol=stock_code[2:],period="daily", start_date=start_date, end_date=end_date,)
+        df = ak.stock_zh_a_hist(symbol=stock_code[2:],period="daily", start_date=start_date, end_date=end_date)
+        print(df)
         adj_factor = ak.stock_zh_a_daily(symbol=stock_code, start_date=start_date, end_date=end_date, adjust="qfq-factor")
         df = df.drop(columns=['振幅', '涨跌幅','涨跌额','换手率'])
         df = df.rename(columns={
@@ -64,6 +67,14 @@ def ak_data_to_csv(config):
         df.set_index("date", inplace=True)
         df.sort_index(inplace=True)
 
+
+        # 获取第一行的 qfq_factor 值
+        first_row_qfq_factor = adj_factor.loc[0, 'qfq_factor']
+        # 在第一行插入新的数据
+        adj_factor.loc[-1] = [current_date, first_row_qfq_factor]  # 这是临时的行，我们将它放在 DataFrame 的开始
+        adj_factor.index = adj_factor.index + 1  # 把所有的索引都向下移动一个位置
+        adj_factor = adj_factor.sort_index()  # 对索引进行排序，这将使得新插入的行成为第一行
+        
         adj_factor["date"] = pd.to_datetime(adj_factor["date"])
         adj_factor.set_index("date", inplace=True)
         adj_factor.sort_index(inplace=True)
@@ -94,6 +105,7 @@ def ak_data_to_csv(config):
         data.columns = ["stock_code","open", "high", "low", "close", "volume", "money", "vwap", "change","factor"]
         # 存储文件
         data.to_csv(f'{csv_path}/{stock_code.lower()}.csv', index=True)
+        print(data)
         print("已更新：",stock_code)
 
     csv_bin(dump_path,csv_path,data_path)
