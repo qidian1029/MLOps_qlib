@@ -192,11 +192,10 @@ def qlib_upgrade_data(target_dir):
 def akshare_upgrade_data(data_path):
     #获取所有股票代码
     stock_list = ak.stock_zh_a_spot()
-
+    #stock_list = stock_list[1:10]
     from tqdm import tqdm
     stock_info_list = []  # 创建一个列表来保存每个股票的信息
-    
-    for symbol in tqdm(stock_list['代码']):  # 使用 tqdm 包装迭代器   
+    for symbol in tqdm(stock_list['代码'],desc='保存股票时间区间数据'):  # 使用 tqdm 包装迭代器   
         try:
             # 尝试获取股票历史数据
             stock_hist_data = ak.stock_zh_a_daily(symbol=symbol, adjust="qfq")
@@ -211,8 +210,8 @@ def akshare_upgrade_data(data_path):
                 stock_info_list.append(f'{symbol.upper()}\t{start_date}\t{end_date}\n')
             
         except Exception as e:
-            print(f"Error processing symbol: {symbol}")
+            print(f"Error processing symbol: {symbol}",end='/n')
 
     # 在所有股票处理完之后，将列表写入文件
-    with open(f'{data_path}/stock_dates.txt', 'a') as file:  # 注意这里用 'w' 而不是 'a'
+    with open(f'{data_path}/stock_dates.txt', 'w') as file:  # 注意这里用 'w' 而不是 'a'
         file.writelines(stock_info_list)
